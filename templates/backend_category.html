@@ -1,0 +1,150 @@
+{% extends 'backend_layout.html' %}
+{% block css %}
+
+{% endblock %}
+{% block conent %}
+    <ol class="breadcrumb">
+        <li><a href="#">分类管理</a></li>
+        <li class="active">分类列表</li>
+    </ol>
+    <div>
+        <div class="row" style="padding: 20px 5px;">
+            <form class="form-horizontal">
+                <div class="col-xs-12">
+                    <div class="form-group">
+                        <label class="col-xs-1 control-label">分类名称</label>
+
+                        <div class="col-xs-3">
+                            <input type="text" class="form-control" id="add_category" placeholder="请输入分类名称">
+                        </div>
+                        <div class="col-xs-3">
+                            <input type="button" class="btn btn-primary" id="add_cate" value="添 加">
+                        </div>
+                        <div class="catetip"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div style="height: 35px;background-color: #f5f5f5;line-height: 35px;padding: 0 15px;">
+            <i class="fa fa-table" aria-hidden="true"></i>
+            标签列表
+        </div>
+
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>序号</th>
+                <th>分类</th>
+                <th>文章个数</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in date_list %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ row.title }}</td>
+                    <td>{{ row.c }}</td>
+                    <td>
+                        <a >
+                            <button type="button" class="btn btn-primary btn-xs" data-toggle="modal"
+                                    data-target="#exampleModal" data-cate_id={{ row.nid }} id="edit_category"
+                               cate_id={{ row.nid }}>编辑</button>
+                        </a>
+                        |
+                        <a class="btn btn-danger btn-xs" id="del_category" cate_id={{ row.nid }}>
+                            <i class="fa fa-times" aria-hidden="true"></i>
+                            删除
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">New message</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="recipient-name" class="control-label">Recipient:</label>
+                            <input type="text" class="form-control" id="recipient-name">
+                        </div>
+                        <div class="form-group">
+                            <label for="message-text" class="control-label">Message:</label>
+                            <textarea class="form-control" id="message-text"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Send message</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="clearfix" style="margin-top: 0">
+        <ul class="pagination right" style="margin-top: 0">
+            {{ page_str }}
+        </ul>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="/static/js/jquery-1.12.4.js"></script>
+    <script src="/static/plugins/bootstrap/js/bootstrap.js"></script>
+    <script>
+        $('#add_cate').click(function () {
+            var add_cate = $('#add_category').val();
+            console.log(add_cate);
+            $.ajax({
+                url: 'backend/add_category/',
+                type: 'POST',
+                data: {
+                    add_cate: add_cate,
+                },
+                success: function (data) {
+                    if (data.statu == true) {
+                        location.reload()
+                    } else {
+                        var a = data.res;
+                        $('.catetip').html(a);
+                    }
+                    setTimeout(function () {
+                        $('.catetip').html('');
+                    }, 5000)
+                }
+
+            })
+        });
+        $('td #del_category').click(function () {
+            var cate_id = $(this).attr('cate_id');
+            $.ajax({
+                url: 'backend/del_category/',
+                type: 'POST',
+                data: {
+                    cate_id: cate_id,
+                },
+                success: function (data) {
+                    console.log(data);
+                    location.reload();
+                }
+            })
+        });
+        $('#exampleModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget) // Button that triggered the modal
+            var recipient = button.data('cate_id') // Extract info from data-* attributes
+            console.log(button)
+            var modal = $(this)
+            modal.find('.modal-title').text('New message to ' + recipient)
+            modal.find('.modal-body input').val(recipient)
+        })
+    </script>
+{% endblock %}

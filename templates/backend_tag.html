@@ -1,0 +1,160 @@
+{% extends 'backend_layout.html' %}
+{% block css %}
+
+{% endblock %}
+{% block conent %}
+    <ol class="breadcrumb">
+        <li><a href="#">标签管理</a></li>
+        <li class="active">标签列表</li>
+    </ol>
+    <div>
+        <div class="row" style="padding: 20px 5px;">
+            <form class="form-horizontal" id="addTag" action="{% url 'tag' %}" method="post">
+                <div class="col-xs-12">
+                    <div class="form-group">
+                        <label class="col-xs-1 control-label">标签名</label>
+
+                        <div class="col-xs-3">
+                            <input type="text" class="form-control" id="tagname" name="tagname" placeholder="请输入标签名"/>
+                        </div>
+                        <div class="col-xs-3">
+                            <input type="button" class="btn btn-primary" id="addtagname" value="添 加"/>
+                        </div>
+                        <div class="col-xs-12" id="addgjxx"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div style="height: 35px;background-color: #f5f5f5;line-height: 35px;padding: 0 15px;">
+            <i class="fa fa-table" aria-hidden="true"></i>
+            标签列表
+        </div>
+
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>标签</th>
+                <th>文章个数</th>
+                <th>序号</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for tags in tag_list %}
+                <tr>
+                    <td id="title" >{{ tags.title }}</td>
+                    <td id="article_count">{{ article_count }}</td>
+                    <td id="tag_nid">{{ tags.nid }}</td>
+                    <td>
+                        <a class="btn btn-danger btn-xs" id="del" tag_id={{ tags.nid }}>
+                            <i class="fa fa-times" aria-hidden="true"></i>
+                            删除
+                        </a>
+                        |
+                        <a class="btn btn-primary btn-xs" id="tag_edit" tag_id={{ tags.nid }} title={{ tags.title }} article_count={{ article_count }}>
+                            <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                            编辑
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div id="tag-edit-1" style="display: none">
+            <div>
+                标签
+                <input type="text" id="tag_edit_cn" value=""/>
+                <input type="button" id="tag_sbm" value="提交">
+            </div>
+        </div>
+        <div class="clearfix">
+            <ul class="pagination right" style="margin-top: 0">
+                <li><a href="#">&laquo;</a></li>
+                <li><a href="#">1</a></li>
+                <li><a href="#">2</a></li>
+                <li><a href="#">3</a></li>
+                <li><a href="#">4</a></li>
+                <li><a href="#">5</a></li>
+                <li><a href="#">&raquo;</a></li>
+            </ul>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block js %}
+    <script src="/static/js/jquery-1.12.4.js"></script>
+    <script>
+        $('#addtagname').click(function () {
+            var add_tag=$('#tagname').val();
+            $.ajax({
+                url:'backend/add_tag/',
+                type:'POST',
+                data:{
+                    add_tag: add_tag,
+                },
+                success:function (data) {
+                    console.log(data.statu);
+                    if (data.statu==true){
+                        console.log(data);
+                        location.reload();
+                    }else {
+                        var a=data.res;
+                        $('#addgjxx').html(a);
+                    }
+                    setTimeout(function () {
+                            $("#addgjxx").html("")
+                        },5000)
+
+                }
+            });
+        });
+        $('td #del').click(function () {
+            var tag_id=$(this).attr("tag_id");
+            $.ajax({
+                url:'backend/del_tag/',
+                type:'POST',
+                data:{
+                    tag_id: tag_id,
+                },
+                success:function (data) {
+                    console.log(data);
+                    if (data){
+                        location.reload();
+                    }
+                }
+            });
+        });
+        $('td #tag_edit').click(function () {
+            var tg=document.getElementById('tag-edit-1');
+            tg.style.display ="";
+            var tag_edit_cn=document.getElementById('tag_edit_cn');
+            var tag_id=$(this).attr("tag_id");
+            var tag_title=$(this).attr('title');
+            var tag_com=document.getElementById('tag_edit_cn').value+=tag_title;
+
+            $('#tag_sbm').click(function () {
+                var tag_commend = $('#tag_edit_cn').val();
+                console.log(tag_commend);
+                $.ajax({
+                url:'backend/edit_tag/',
+                type:'POST',
+                data:{
+                    tag_id:tag_id,
+                    tag_title:tag_commend,
+                },
+                success:function (data) {
+                    console.log(data);
+                    if(data){
+                        location.reload();
+                    }
+
+                }
+            });
+            })
+
+        })
+    </script>
+{% endblock %}
